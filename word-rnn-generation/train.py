@@ -10,8 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from torchvision import datasets, transforms
-
-import os
+import pdb
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
@@ -69,19 +68,27 @@ optimizer = torch.optim.Adam(text_generation_model.parameters() , lr = 0.001)
 train_size  = textLoader.batch_size*args.seq_length
 def train(epoch):
 	text_generation_model.train()
-	textLoader.reset_batch_pointer();hidden = text_generation_model.init_hidden()
+	textLoader.reset_batch_pointer()
 	for i in range(num_batches):
+		train_loss = 0
 		data, target = textLoader.next_batch()
 		data = Variable(torch.from_numpy(data).cuda())
 		target = Variable(torch.from_numpy(target).cuda())
+		
+
+
 		optimizer.zero_grad()
-		output = text_generation_model(data, hidden)
+
+		output = text_generation_model(data)
 		loss = criterion(output, target)
+		train_loss += loss.data[0]
 		loss.backward()
 		optimizer.step()
 
 		if (i+1) % 100 == 0:
                     print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f' %(epoch+1, num_epochs, i+1, num_batches, loss.data[0]))
+
+	# print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
 
 for epoch in range(args.epochs):
