@@ -21,7 +21,6 @@ class LSTM(nn.Module):
         self.lstm = nn.LSTM(hidden_size, hidden_size, n_layers)
         self.decoder = nn.Linear(hidden_size, output_size)
 
-<<<<<<< HEAD
     def forward(self, x):
         
         x = self.encoder(x)
@@ -35,7 +34,7 @@ class LSTM(nn.Module):
     def init_hidden(self):
     	return Variable(torch.zeros(self.n_layers, 1, self.hidden_size))
 """
-=======
+
     def forward(self, x, hidden):
         #input = self.encoder(input.view(1, -1))
         t,n = x.size(0), x.size(0)
@@ -74,4 +73,4 @@ class GRU(nn.Module):
 
     def init_hidden(self):
     	return Variable(torch.zeros(self.n_layers, 1, self.hidden_size))
->>>>>>> c579ced07c46c40a3f0a8fab862abc4935ef0675
+
