@@ -37,15 +37,23 @@ class LSTM(nn.Module):
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.n_layers = n_layers
-
-        self.encoder = nn.Embedding(input_size, hidden_size)
+        self.fc_in = nn.Linear(input_size,hidden_size)
+        #self.encoder = nn.Embedding(input_size, hidden_size)
         self.lstm = nn.LSTM(hidden_size, hidden_size, n_layers)
         self.decoder = nn.Linear(hidden_size, output_size)
 
-    def forward(self, input, hidden):
-        input = self.encoder(input.view(1, -1))
-        output, hidden = self.lstm(input.view(1, 1, -1), hidden)
-        output = self.decoder(output.view(1, -1))
+    def forward(self, x, hidden):
+        #input = self.encoder(input.view(1, -1))
+        t,n = x.size(0), x.size(0)
+        x = x.contiguous().view(t*n, -1)
+        output, hidden = self.fc_in(input)
+        output = output.contiguous().view(t, n, -1)
+        #output, hidden = self.lstm(input.view(1, 1, -1), hidden)
+        output, hidden = self.lstm(output)
+        output = output.contiguous().view(t*n,-1)
+        output = self.decoder(output)
+        output = output.contiguous().view(t, n, -1)
+        #output = self.decoder(output.view(1, -1))
         return output, hidden
 
     def init_hidden(self):
@@ -66,7 +74,7 @@ class GRU(nn.Module):
 
     def forward(self, input, hidden):
         input = self.encoder(input.view(1, -1))
-        output, hidden = self.gru(input.view(1, 1, -1), hidden)
+        output, hidden = self.GRU(input.view(1, 1, -1), hidden)
         output = self.decoder(output.view(1, -1))
         return output, hidden
 
