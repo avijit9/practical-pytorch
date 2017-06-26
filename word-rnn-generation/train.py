@@ -64,28 +64,24 @@ if args.cuda:
 num_batches = textLoader.num_batches
 
 criterion = nn.CrossEntropyLoss()
-optimizer = nn.torch.optim.Adam(lr = 0.001)
+optimizer = torch.optim.Adam(text_generation_model.parameters() , lr = 0.001)
 
-train_size  = textLoader.batch_size*seq_length
+train_size  = textLoader.batch_size*args.seq_length
 def train(epoch):
 	text_generation_model.train()
-
+	textLoader.reset_batch_pointer();hidden = text_generation_model.init_hidden()
 	for i in range(num_batches):
 		data, target = textLoader.next_batch()
-		data = Variable(data.cuda())
-		target = Variable(target.cuda())
+		data = Variable(torch.from_numpy(data).cuda())
+		target = Variable(torch.from_numpy(target).cuda())
 		optimizer.zero_grad()
-		output = text_generation_model(data)
+		output = text_generation_model(data, hidden)
 		loss = criterion(output, target)
 		loss.backward()
 		optimizer.step()
 
 		if (i+1) % 100 == 0:
-                print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f' 
-                       %(epoch+1, num_epochs, i+1, num_batches, loss.data[0]))
-    text_generation_model.reset_batch_pointer()
-
-    return(model_ft)
+                    print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f' %(epoch+1, num_epochs, i+1, num_batches, loss.data[0]))
 
 
 for epoch in range(args.epochs):
