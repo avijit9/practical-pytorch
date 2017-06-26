@@ -10,9 +10,10 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from torchvision import datasets, transforms
-import pdb
+
+import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 print("Imported all libraries successfully!")
 
@@ -62,38 +63,48 @@ if args.cuda:
 	text_generation_model = text_generation_model.cuda()
 num_batches = textLoader.num_batches
 
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(text_generation_model.parameters() , lr = 0.001)
+
 
 train_size  = textLoader.batch_size*args.seq_length
 def train(epoch):
 	text_generation_model.train()
-	textLoader.reset_batch_pointer()
-	
-	# hidden = text_generation_model.init_hidden()
+	textLoader.reset_batch_pointer();hidden = text_generation_model.init_hidden()
+	for epoch in range(args.epochs):
+		for i in range(num_batches):
+			data, target = textLoader.next_batch()
+			data = Variable(torch.from_numpy(data).cuda())
+			target = Variable(torch.from_numpy(target).cuda())
+			optimizer.zero_grad()
+			output = text_generation_model(data, hidden)
+			loss = criterion(output, target)
+			loss.backward()
+			optimizer.step()
 
-	for i in range(num_batches):
-		train_loss = 0
-		data, target = textLoader.next_batch()
-		data = Variable(torch.from_numpy(data).cuda())
-		target = Variable(torch.from_numpy(target).cuda())
-		
-
-
-		optimizer.zero_grad()
-
-		output, hidden = text_generation_model(data)
-		pdb.set_trace()
-		loss = criterion(output, target)
-		train_loss += loss.data[0]
-		loss.backward()
-		optimizer.step()
-
-		if (i+1) % 100 == 0:
-                    print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f' %(epoch+1, num_epochs, i+1, num_batches, loss.data[0]))
-
-	# print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
+			if (i+1) % 100 == 0:
+	                    print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f' %(epoch+1, num_epochs, i+1, num_batches, loss.data[0]))
 
 
-for epoch in range(args.epochs):
-	train(epoch)
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(text_generation_model.parameters() , lr = 0.001)
+text_generation_model = train(text_generation_model, criterion, optimizer, args.epochs)
+
+x_test,y_test = TextDataLoader.test()
+
+
+class decoder:
+	def __init__(self, output, vocab):
+		self.output = output  #output from the model should be a list of indices 
+		self.vocab = vocab #dictionary with indices as keys and words as values
+	def convert_to_string():
+		output = list(output)
+		decoded = ' '.join(list(map(lambda x: vocab[x], output)))
+		return decoded
+
+
+
+
+
+
+
+
+
