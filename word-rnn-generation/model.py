@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from torchvision import datasets, transforms
-
+import pdb
 
 
 
@@ -21,12 +21,13 @@ class LSTM(nn.Module):
         self.lstm = nn.LSTM(hidden_size, hidden_size, n_layers)
         self.decoder = nn.Linear(hidden_size, output_size)
 
-    def forward(self, input):
+    def forward(self, x):
+        
+        x = self.encoder(x)
+        output, hidden = self.lstm(x)
         pdb.set_trace()
-        input = self.encoder(input.view(1, -1))
-        output, hidden = self.lstm(input.view(1, 1, -1))
-        output = self.decoder(output.view(1, -1))
-        return output, hidden
+        decoded = self.decoder(output.view(output.size(0)*output.size(1), output.size(2)))
+        return decoded.view(output.size(0), output.size(1), decoded.size(1)), hidden
 """
 # Not needed for new pytorch version
 

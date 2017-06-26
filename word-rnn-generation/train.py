@@ -12,7 +12,7 @@ from torch.autograd import Variable
 from torchvision import datasets, transforms
 import pdb
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 print("Imported all libraries successfully!")
 
@@ -69,6 +69,9 @@ train_size  = textLoader.batch_size*args.seq_length
 def train(epoch):
 	text_generation_model.train()
 	textLoader.reset_batch_pointer()
+	
+	# hidden = text_generation_model.init_hidden()
+
 	for i in range(num_batches):
 		train_loss = 0
 		data, target = textLoader.next_batch()
@@ -79,7 +82,8 @@ def train(epoch):
 
 		optimizer.zero_grad()
 
-		output = text_generation_model(data)
+		output, hidden = text_generation_model(data)
+		pdb.set_trace()
 		loss = criterion(output, target)
 		train_loss += loss.data[0]
 		loss.backward()
