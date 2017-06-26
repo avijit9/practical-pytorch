@@ -64,41 +64,43 @@ if args.cuda:
 num_batches = textLoader.num_batches
 
 
-
-train_size  = textLoader.batch_size*args.seq_length
-def train(epoch):
-	text_generation_model.train()
-	textLoader.reset_batch_pointer();hidden = text_generation_model.init_hidden()
-	for epoch in range(args.epochs):
-		for i in range(num_batches):
-			data, target = textLoader.next_batch()
-			data = Variable(torch.from_numpy(data).cuda())
-			target = Variable(torch.from_numpy(target).cuda())
-			optimizer.zero_grad()
-			output = text_generation_model(data, hidden)
-			loss = criterion(output, target)
-			loss.backward()
-			optimizer.step()
-
-			if (i+1) % 100 == 0:
-	                    print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f' %(epoch+1, num_epochs, i+1, num_batches, loss.data[0]))
-
-
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(text_generation_model.parameters() , lr = 0.001)
-text_generation_model = train(text_generation_model, criterion, optimizer, args.epochs)
 
-x_test,y_test = TextDataLoader.test()
+train_size  = textLoader.batch_size*args.seq_length
+
+def train(epoch):
+	text_generation_model.train()
+	
+	textLoader.reset_batch_pointer()#;hidden = text_generation_model.init_hidden()
+	for i in range(num_batches):
+		data, target = textLoader.next_batch()
+		data = Variable(torch.from_numpy(data).cuda())
+		target = Variable(torch.from_numpy(target).cuda())
+		optimizer.zero_grad()
+		output = text_generation_model(data)
+		#pdb.set_trace()
+		loss = criterion(output.view(-1, textLoader.vocab_size), target.view(-1))
+		loss.backward()
+		optimizer.step()
+		if (i+1) % 10 == 0:
+
+			print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f' %(epoch+1, args.epochs, i+1, num_batches, loss.data[0]))
+
+for epoch in range(args.epochs):
+	train(epoch)
+
+# x_test,y_test = TextDataLoader.test()
 
 
-class decoder:
-	def __init__(self, output, vocab):
-		self.output = output  #output from the model should be a list of indices 
-		self.vocab = vocab #dictionary with indices as keys and words as values
-	def convert_to_string():
-		output = list(output)
-		decoded = ' '.join(list(map(lambda x: vocab[x], output)))
-		return decoded
+# class decoder:
+# 	def __init__(self, output, vocab):
+# 		self.output = output  #output from the model should be a list of indices 
+# 		self.vocab = vocab #dictionary with indices as keys and words as values
+# 	def convert_to_string():
+# 		output = list(output)
+# 		decoded = ' '.join(list(map(lambda x: vocab[x], output)))
+# 		return decoded
 
 
 
