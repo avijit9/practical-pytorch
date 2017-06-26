@@ -32,25 +32,6 @@ class LSTM(nn.Module):
         return decoded.view(-1, x.size(1), decoded.size(1))
 
 
-
-
-
-
-
-
-
-        # t,n = x.size(0), x.size(0)
-        # x = x.contiguous().view(t*n, -1)
-        # output, hidden = self.fc_in(input)
-        # output = output.contiguous().view(t, n, -1)
-        # #output, hidden = self.lstm(input.view(1, 1, -1), hidden)
-        # output, hidden = self.lstm(output)
-        # output = output.contiguous().view(t*n,-1)
-        # output = self.decoder(output)
-        # output = output.contiguous().view(t, n, -1)
-        # #output = self.decoder(output.view(1, -1))
-        return output, hidden
-
     def init_hidden(self):
     	return Variable(torch.zeros(self.n_layers, 1, self.hidden_size))
 
