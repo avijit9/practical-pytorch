@@ -21,7 +21,7 @@ class RNN(nn.Module):
 
     def forward(self, input, hidden):
         input = self.encoder(input.view(1, -1))
-        output, hidden = self.RNN(input.view(1, 1, -1), hidden)
+        output, hidden = self.rnn(input.view(1, 1, -1), hidden)
         output = self.decoder(output.view(1, -1))
         return output, hidden
 
@@ -44,7 +44,7 @@ class LSTM(nn.Module):
 
     def forward(self, input, hidden):
         input = self.encoder(input.view(1, -1))
-        output, hidden = self.LSTM(input.view(1, 1, -1), hidden)
+        output, hidden = self.lstm(input.view(1, 1, -1), hidden)
         output = self.decoder(output.view(1, -1))
         return output, hidden
 
@@ -66,7 +66,7 @@ class GRU(nn.Module):
 
     def forward(self, input, hidden):
         input = self.encoder(input.view(1, -1))
-        output, hidden = self.GRU(input.view(1, 1, -1), hidden)
+        output, hidden = self.gru(input.view(1, 1, -1), hidden)
         output = self.decoder(output.view(1, -1))
         return output, hidden
 
