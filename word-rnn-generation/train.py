@@ -61,3 +61,32 @@ text_generation_model  = LSTM(textLoader.vocab_size, args.rnn_size, textLoader.v
 
 if args.cuda:
 	text_generation_model = text_generation_model.cuda()
+num_batches = textLoader.num_batches
+
+criterion = nn.CrossEntropyLoss()
+optimizer = nn.torch.optim.Adam(lr = 0.001)
+
+train_size  = textLoader.batch_size*seq_length
+def train(epoch):
+	text_generation_model.train()
+
+	for i in range(num_batches):
+		data, target = textLoader.next_batch()
+		data = Variable(data.cuda())
+		target = Variable(target.cuda())
+		optimizer.zero_grad()
+		output = text_generation_model(data)
+		loss = criterion(output, target)
+		loss.backward()
+		optimizer.step()
+
+		if (i+1) % 100 == 0:
+                print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f' 
+                       %(epoch+1, num_epochs, i+1, num_batches, loss.data[0]))
+    text_generation_model.reset_batch_pointer()
+
+    return(model_ft)
+
+
+for epoch in range(args.epochs):
+	train(epoch)

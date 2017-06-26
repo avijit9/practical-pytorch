@@ -63,7 +63,7 @@ class TextDataLoader():
 				cPickle.dump(self.words, f)
 
 			self.tensor = np.array(list(map(self.vocab.get, text)))
-
+            
 			np.save(tensor_file,self.tensor)
 
 	def create_batches(self):
